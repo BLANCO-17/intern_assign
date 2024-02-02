@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+        <title>Weather App</title>
+    </head>
+
+    <body class="bg-gray-200 p-8">
+
+        <div class="max-w-md mx-auto bg-white p-8 rounded shadow-md">
+            <h1 class="text-2xl font-semibold mb-4">Weather App</h1>
+
+            <div class="mb-4">
+                <label for="cityInput" class="block text-sm font-medium text-gray-600">Enter City:</label>
+                <input type="text" id="cityInput" class="mt-1 p-2 w-full border rounded-md">
+            </div>
+            <button onclick="addCity()" class="bg-blue-500 text-white px-4 py-2 rounded-md">Add City</button>
+            <button onclick="getWeather()" class="bg-green-500 text-white px-4 py-2 rounded-md ml-2">Get Weather</button>
+
+            <div id="citiesList" class="mt-4">
+                <p class="text-sm font-medium text-gray-600 mb-2">Selected Cities:</p>
+                <ul id="citiesUl" class="list-disc pl-4"></ul>
+            </div>
+
+            <div id="output" class="mt-4"></div>
+        </div>
+
+        <script>
+            let cities = [];
+        
+            function addCity() {
+                const cityInput = document.getElementById('cityInput');
+                const city = cityInput.value.trim();
+            
+                if (city) {
+                    cities.push(city);
+                    cityInput.value = '';
+                    updateOutput();
+                }
+            }
+        
+            async function getWeather() {
+                try {
+                    
+                    const response = await fetch('http://localhost:3000/getWeather', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ cities }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    const outputDiv = document.getElementById('output');
+                    outputDiv.innerHTML = ''
+
+                    for(var city in data.weather){                        
+                        outputDiv.innerHTML += `<p>${(city + " : "+ data.weather[city]).toUpperCase()}</p>`;            
+                    }
+                } catch (error) {
+                    console.error('Error:', error.message);
+                }
+            }
+        
+            function updateOutput() {
+                const citiesUl = document.getElementById('citiesUl');
+                citiesUl.innerHTML = '';
+                
+                cities.forEach(city => {
+                    const li = document.createElement('li');
+                    li.textContent = city;
+                    citiesUl.appendChild(li);
+                });
+            
+                document.getElementById('output').innerHTML = '';
+            }
+        </script>
+    
+    </body>
+</html>
